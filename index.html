@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#7a1518">
+    <title>Sequence Detective: Advanced Mission (Grade 11)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rammetto+One&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #7a1518;
+            --card-bg: #5c0f12;
+            --accent-gold: #fdd835;
+            --accent-blue: #9bd8e8;
+            --accent-purple: #ff9f0a;   /* orange accent (name kept so the code stays the same) */
+            --text-light: #fff8e7;
+            --correct-green: #34d399;
+            --wrong-red: #ff8a8a;
+            --btn-bg: #8f2226;
+            --btn-hover: #a82a2f;
+            --deep: #3d0a0c;
+            --display-font: 'Rammetto One', 'Segoe UI', system-ui, sans-serif;
+            --hand-font: 'Patrick Hand', 'Segoe Print', 'Comic Sans MS', cursive;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html { -webkit-text-size-adjust: 100%; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            position: relative;
+            padding: max(15px, env(safe-area-inset-top)) max(15px, env(safe-area-inset-right))
+                     max(15px, env(safe-area-inset-bottom)) max(15px, env(safe-area-inset-left));
+        }
+
+        /* ---------- PowerPoint-style decorations ---------- */
+        .deco {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            user-select: none;
+        }
+        .deco-pi {
+            top: -14px; left: 12px;
+            font-family: var(--display-font);
+            font-size: 190px; line-height: 1;
+            color: var(--accent-gold);
+            text-shadow: 6px 6px 0 #c99a00;
+            transform: rotate(-6deg);
+        }
+        .deco-triangle { top: 0; right: 0; width: 230px; }
+        .deco-protractor { bottom: 0; left: 0; width: 220px; }
+        .deco-calc { bottom: 0; right: 0; width: 150px; }
+        .deco-text {
+            font-family: var(--hand-font);
+            color: var(--accent-purple);
+            opacity: 0.35;
+            font-size: 2.2rem;
+            white-space: nowrap;
+        }
+        .deco-t1 { top: 28px; left: 38%; transform: rotate(-4deg); }
+        .deco-t2 { bottom: 26px; left: 36%; transform: rotate(3deg); }
+        .deco-t3 { top: 46%; right: 14px; font-size: 1.8rem; opacity: 0.3; transform: rotate(-3deg); }
+
+        .game-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 650px;
+            background-color: var(--card-bg);
+            border: 3px solid var(--accent-gold);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 0 0 6px rgba(255, 159, 10, 0.25), 0 12px 32px rgba(0, 0, 0, 0.55);
+        }
+
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px 12px;
+            border-bottom: 2px dashed var(--accent-purple);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .title { font-family: var(--display-font); font-size: 1.2rem; color: var(--accent-gold); font-weight: normal; }
+        .stats { font-size: 1rem; color: var(--accent-blue); font-weight: bold; white-space: nowrap; }
+
+        .screen { display: none; animation: fadeIn 0.5s; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 {
+            font-family: var(--display-font);
+            font-weight: normal;
+            color: var(--accent-blue);
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+        }
+        p { line-height: 1.6; margin-bottom: 15px; font-size: 1.05rem; }
+        p strong { color: var(--accent-gold); }
+        ul { margin: 0 0 15px 20px; line-height: 1.7; }
+
+        .badge {
+            font-family: var(--display-font);
+            background: var(--accent-purple); color: #3d0a0c; padding: 4px 12px;
+            border-radius: 20px; font-size: 0.85rem; font-weight: normal;
+        }
+
+        .btn {
+            background-color: var(--accent-gold); color: #3d0a0c; border: none;
+            font-family: var(--display-font);
+            padding: 14px 20px; border-radius: 10px; font-weight: normal;
+            font-size: 1.05rem; cursor: pointer; width: 100%; margin-top: 15px;
+            box-shadow: 0 4px 0 #c99a00;
+            transition: 0.2s;
+            min-height: 48px;
+            touch-action: manipulation;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #c99a00; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 15px 0; }
+        .options-grid.full-width { grid-template-columns: 1fr; }
+
+        .option-btn {
+            background-color: var(--btn-bg); color: var(--text-light); border: 2px solid var(--accent-purple);
+            padding: 14px; border-radius: 10px; text-align: center; cursor: pointer;
+            font-size: 1.1rem; font-weight: bold; transition: 0.2s;
+            min-height: 52px;
+            touch-action: manipulation;
+            word-break: break-word;
+        }
+        .option-btn.text-left { text-align: left; font-size: 1rem; font-weight: normal; }
+        .option-btn:active { background-color: var(--btn-hover); border-color: var(--accent-gold); }
+
+        /* Hover effects only on devices that actually support hover (not touch screens) */
+        @media (hover: hover) {
+            .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #c99a00; }
+            .option-btn:hover { background-color: var(--btn-hover); border-color: var(--accent-gold); }
+        }
+
+        .feedback {
+            margin-top: 15px; padding: 12px; border-radius: 10px; font-weight: bold; display: none;
+            line-height: 1.5;
+        }
+        .feedback.correct { background: rgba(52, 211, 153, 0.15); color: var(--correct-green); border: 2px solid var(--correct-green); display: block; }
+        .feedback.incorrect { background: rgba(255, 138, 138, 0.12); color: var(--wrong-red); border: 2px solid var(--wrong-red); display: block; }
+
+        .math-box {
+            background: var(--deep); padding: 15px; border-left: 5px solid var(--accent-gold);
+            margin-bottom: 15px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 1.1rem;
+            text-align: center; font-weight: bold; letter-spacing: 1px;
+            color: var(--accent-gold);
+            overflow-x: auto;
+        }
+
+        .final-msg { font-family: var(--display-font); color: var(--accent-gold); font-size: 1.3rem; text-align: center; margin-top: 20px; }
+
+        /* Tablets / small laptops: shrink decorations */
+        @media (max-width: 900px) {
+            .deco-pi { font-size: 120px; }
+            .deco-triangle { width: 150px; }
+            .deco-protractor { width: 140px; }
+            .deco-calc { width: 100px; }
+            .deco-text { display: none; }
+        }
+
+        /* Phones */
+        @media (max-width: 480px) {
+            body { align-items: flex-start; }
+            .deco-pi { font-size: 80px; top: -8px; left: 4px; }
+            .deco-triangle { width: 100px; }
+            .deco-protractor { width: 90px; }
+            .deco-calc { width: 70px; }
+            .game-container { padding: 16px; margin-top: 40px; }
+            .title { font-size: 1rem; }
+            .stats { font-size: 0.9rem; }
+            h2 { font-size: 1.15rem; }
+            p { font-size: 1rem; }
+            .math-box { font-size: 1rem; letter-spacing: 0; padding: 12px 8px; }
+            .option-btn { font-size: 1.05rem; padding: 14px 10px; }
+            .option-btn.text-left { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Decorations (same look as the presentation) -->
+<div class="deco deco-pi">π</div>
+
+<svg class="deco deco-triangle" viewBox="0 0 230 200" aria-hidden="true">
+    <path d="M230 0 L230 170 L0 170 Z" fill="#ff9f0a"/>
+    <path d="M205 60 L205 140 L90 140 Z" fill="#7a1518"/>
+    <g fill="#fdd835">
+        <circle cx="30" cy="155" r="5"/><circle cx="55" cy="155" r="5"/><circle cx="80" cy="155" r="5"/>
+        <circle cx="105" cy="155" r="5"/><circle cx="130" cy="155" r="5"/><circle cx="155" cy="155" r="5"/>
+        <circle cx="180" cy="155" r="5"/><circle cx="205" cy="155" r="5"/>
+    </g>
+    <path d="M10 70 A60 60 0 0 1 130 70" fill="none" stroke="#fdd835" stroke-width="8"/>
+</svg>
+
+<svg class="deco deco-protractor" viewBox="0 0 220 160" aria-hidden="true">
+    <path d="M10 150 A100 100 0 0 1 210 150 Z" fill="#fff8e7"/>
+    <path d="M45 150 A65 65 0 0 1 175 150 Z" fill="#7a1518"/>
+    <g stroke="#ff9f0a" stroke-width="3">
+        <line x1="110" y1="150" x2="110" y2="62"/>
+        <line x1="110" y1="150" x2="48" y2="88"/>
+        <line x1="110" y1="150" x2="172" y2="88"/>
+    </g>
+</svg>
+
+<svg class="deco deco-calc" viewBox="0 0 150 170" aria-hidden="true">
+    <rect x="25" y="15" width="100" height="150" rx="10" fill="#f26b6b"/>
+    <rect x="35" y="25" width="80" height="26" rx="4" fill="#9bd8e8"/>
+    <g fill="#fdd835">
+        <rect x="35" y="62" width="22" height="18" rx="3"/><rect x="64" y="62" width="22" height="18" rx="3"/><rect x="93" y="62" width="22" height="18" rx="3"/>
+        <rect x="35" y="88" width="22" height="18" rx="3"/><rect x="64" y="88" width="22" height="18" rx="3"/><rect x="93" y="88" width="22" height="18" rx="3"/>
+        <rect x="35" y="114" width="22" height="18" rx="3"/><rect x="64" y="114" width="22" height="18" rx="3"/><rect x="93" y="114" width="22" height="18" rx="3"/>
+    </g>
+</svg>
+
+<div class="deco deco-text deco-t1">a ÷ b or a/b</div>
+<div class="deco deco-text deco-t2">a ÷ b or a/b</div>
+<div class="deco deco-text deco-t3">sin(θ) = opp / hyp</div>
+
+<div class="game-container">
+    <div class="header">
+        <div class="title">🕵️‍♂️ Sequence Detective: Pro</div>
+        <div class="stats">Level: <span id="level-indicator">0</span>/4 | Keys: <span id="score">0</span></div>
+    </div>
+
+    <!-- Welcome -->
+    <div id="screen-0" class="screen active">
+        <h2>Welcome to the Advanced Vault</h2>
+        <p>Agent, the Grade 11 vault uses <strong>Second Differences</strong>, <strong>Summation (Σ)</strong>, and <strong>Recursive Logic</strong>.</p>
+        <p>No typing required. Just tap the correct code to proceed.</p>
+        <button class="btn" onclick="nextLevel(1)">Start</button>
+    </div>
+
+    <!-- Level 1: Second Differences -->
+    <div id="screen-1" class="screen">
+        <h2><span class="badge">Level 1</span> The Deep Pattern</h2>
+        <p>Analyze this sequence. Notice that the first difference is NOT constant, but the <strong>second difference</strong> is.</p>
+        <div class="math-box">3, 6, 11, 18, 27, [ ? ]</div>
+        <p>Select the next term in the sequence:</p>
+        <div class="options-grid">
+            <button class="option-btn" onclick="checkLevel1(36)">36</button>
+            <button class="option-btn" onclick="checkLevel1(38)">38</button>
+            <button class="option-btn" onclick="checkLevel1(40)">40</button>
+            <button class="option-btn" onclick="checkLevel1(31)">31</button>
+        </div>
+        <div id="fb-1" class="feedback"></div>
+    </div>
+
+    <!-- Level 2: Summation Logic -->
+    <div id="screen-2" class="screen">
+        <h2><span class="badge">Level 2</span> The Telescoping Sum</h2>
+        <p>If <em>b<sub>k</sub></em> is the difference sequence defined as <em>b<sub>k</sub> = a<sub>k+1</sub> − a<sub>k</sub></em>, what is the result of the following sum?</p>
+        <div class="math-box">∑ (from k=1 to n−1) b<sub>k</sub> = ?</div>
+        <div class="options-grid full-width">
+            <button class="option-btn text-left" onclick="checkLevel2('A')">A) a<sub>n</sub> + a<sub>1</sub></button>
+            <button class="option-btn text-left" onclick="checkLevel2('B')">B) a<sub>n</sub> − a<sub>1</sub></button>
+            <button class="option-btn text-left" onclick="checkLevel2('C')">C) n(a<sub>1</sub> + a<sub>n</sub>) / 2</button>
+            <button class="option-btn text-left" onclick="checkLevel2('D')">D) a<sub>n+1</sub> − a<sub>n−1</sub></button>
+        </div>
+        <div id="fb-2" class="feedback"></div>
+    </div>
+
+    <!-- Level 3: Forward Calculation -->
+    <div id="screen-3" class="screen">
+        <h2><span class="badge">Level 3</span> Build the Sequence</h2>
+        <p>You intercepted a message with two pieces of data:</p>
+        <ul>
+            <li>The first term: <strong>a₁ = 5</strong></li>
+            <li>The difference sequence formula: <strong>bₙ = 2n</strong></li>
+        </ul>
+        <p>What is the value of the 4th term (<strong>a₄</strong>)?</p>
+        <div class="options-grid">
+            <button class="option-btn" onclick="checkLevel3(13)">13</button>
+            <button class="option-btn" onclick="checkLevel3(15)">15</button>
+            <button class="option-btn" onclick="checkLevel3(17)">17</button>
+            <button class="option-btn" onclick="checkLevel3(19)">19</button>
+        </div>
+        <div id="fb-3" class="feedback"></div>
+    </div>
+
+    <!-- Level 4: The General Term Identification -->
+    <div id="screen-4" class="screen">
+        <h2><span class="badge">Level 4</span> Final Vault Code</h2>
+        <p>A sequence has a constant <strong>second difference</strong> of 4. What type of function represents its general term <em>a<sub>n</sub></em>?</p>
+        <div class="options-grid full-width">
+            <button class="option-btn text-left" onclick="checkLevel4('A')">A) A Linear Function (an + b)</button>
+            <button class="option-btn text-left" onclick="checkLevel4('B')">B) A Quadratic Function (an² + bn + c)</button>
+            <button class="option-btn text-left" onclick="checkLevel4('C')">C) An Exponential Function (a·rⁿ)</button>
+        </div>
+        <div id="fb-4" class="feedback"></div>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="screen-5" class="screen">
+        <h2>🏆 Vault Compromised!</h2>
+        <p>Incredible work, Detective! You've mastered Grade 11 Difference Sequences, utilizing second differences and summation logic to crack the code without a single typo.</p>
+        <p class="final-msg">Mission Accomplished!</p>
+        <button class="btn" onclick="location.reload()">Play Again</button>
+    </div>
+</div>
+
+<script>
+    let score = 0;
+    let levelPassed = false; // prevents multiple taps after a correct answer
+
+    function nextLevel(level) {
+        levelPassed = false;
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + level).classList.add('active');
+        if (level > 0 && level <= 4) document.getElementById('level-indicator').innerText = level;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function addScore() {
+        score++;
+        document.getElementById('score').innerText = score;
+    }
+
+    function showFeedback(id, isCorrect, message) {
+        const fb = document.getElementById(id);
+        fb.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+        fb.innerText = message;
+    }
+
+    // Level 1: 38
+    function checkLevel1(choice) {
+        if (levelPassed) return;
+        if (choice === 38) {
+            levelPassed = true;
+            showFeedback('fb-1', true, "Correct! First differences are 3, 5, 7, 9. The next difference is 11. 27 + 11 = 38.");
+            addScore();
+            setTimeout(() => nextLevel(2), 2500);
+        } else {
+            showFeedback('fb-1', false, "Hint: Find the differences between terms. Then find the differences of those differences!");
+        }
+    }
+
+    // Level 2: B
+    function checkLevel2(choice) {
+        if (levelPassed) return;
+        if (choice === 'B') {
+            levelPassed = true;
+            showFeedback('fb-2', true, "Brilliant! This is a telescoping sum. All middle terms cancel out, leaving aₙ − a₁.");
+            addScore();
+            setTimeout(() => nextLevel(3), 2500);
+        } else {
+            showFeedback('fb-2', false, "Hint: Write out the first few terms: (a₂−a₁) + (a₃−a₂) + (a₄−a₃)... what cancels out?");
+        }
+    }
+
+    // Level 3: 17
+    function checkLevel3(choice) {
+        if (levelPassed) return;
+        if (choice === 17) {
+            levelPassed = true;
+            showFeedback('fb-3', true, "Spot on! a₂ = 5+2 = 7. a₃ = 7+4 = 11. a₄ = 11+6 = 17.");
+            addScore();
+            setTimeout(() => nextLevel(4), 2500);
+        } else {
+            showFeedback('fb-3', false, "Hint: Calculate step-by-step. a₂ = a₁ + b₁. Then a₃ = a₂ + b₂. Remember bₙ = 2n.");
+        }
+    }
+
+    // Level 4: B
+    function checkLevel4(choice) {
+        if (levelPassed) return;
+        if (choice === 'B') {
+            levelPassed = true;
+            showFeedback('fb-4', true, "Exactly! A constant first difference means Linear. A constant second difference means Quadratic!");
+            addScore();
+            setTimeout(() => nextLevel(5), 2500);
+        } else {
+            showFeedback('fb-4', false, "Hint: Think about polynomials. The degree drops by 1 each time you take a difference.");
+        }
+    }
+</script>
+</body>
+</html>
